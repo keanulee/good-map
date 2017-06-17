@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+
+  <title>Places I've Been</title>
+
+  <script src="../good-map.js" async defer></script>
+  
+  <style>
+    body {
+      margin: 0;
+    }
+
+    good-map {
+      display: block;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <good-map api-key="AIzaSyAQuo91bcoB-KwWXaANroTrzpNZRFcNJ1k"
+      latitude="30" longitude="-100" zoom="2"
+      map-options='{"styles":[{"featureType":"water","stylers":[{"color":"#3498DB"}]},{"featureType":"landscape","stylers":[{"color":"#ECF0F1"}]}]}'></good-map>
+
+  <script>
+    document.querySelector('good-map').addEventListener('google-map-ready', (e) => {
+      const map = e.detail;
+      map.data.setStyle({
+        fillColor: '#2C3E50',
+        strokeColor: '#2C3E50'
+      });
+      map.data.loadGeoJson('regions.geojson');
+      fetch('paths.json').then((res) => res.json()).then((data) => {
+        data.paths.forEach((path) => {
+          const p0 = data.points[path[0]];
+          const p1 = data.points[path[1]];
+          new google.maps.Polyline({
+            geodesic: true,
+            map: map,
+            path: [{lat: p0[0], lng: p0[1]}, {lat: p1[0], lng: p1[1]}],
+            strokeColor: '#E74C3C',
+            zIndex: 1
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
