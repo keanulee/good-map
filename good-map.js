@@ -1,3 +1,5 @@
+'use strict';
+
 {
   let initCalled;
   const callbackPromise = new Promise((r) => window.__initGoodMap = r);
