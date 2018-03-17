@@ -7,6 +7,8 @@
   function loadGoogleMaps(apiKey) {
     if (!initCalled) {
       const script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
       script.src = 'https://maps.googleapis.com/maps/api/js?' +
         (apiKey ? `key=${apiKey}&` : '') +
         'callback=__initGoodMap';
