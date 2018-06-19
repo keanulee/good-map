@@ -18,29 +18,30 @@
     return callbackPromise;
   }
 
+  function dashToCamelCase(dash) {
+    return dash.indexOf('-') < 0 ? dash : dash.replace(/-[a-z]/g, (m) => m[1].toUpperCase());
+  }
+
   customElements.define('good-map', class extends HTMLElement {
     static get observedAttributes() {
       return ['api-key', 'language', 'region', 'zoom', 'latitude', 'longitude', 'map-options'];
     }
 
     attributeChangedCallback(name, oldVal, val) {
+      name = dashToCamelCase(name);
       switch (name) {
-        case 'api-key':
-          this.apiKey = val;
-          break;
+        case 'apiKey':
         case 'language':
-          this.language = val;
-          break;
         case 'region':
-          this.region = val;
+          this[name] = val;
           break;
         case 'zoom':
         case 'latitude':
         case 'longitude':
           this[name] = parseFloat(val);
           break;
-        case 'map-options':
-          this.mapOptions = JSON.parse(val);
+        case 'mapOptions':
+          this[name] = JSON.parse(val);
           break
       }
     }
