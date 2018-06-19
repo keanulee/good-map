@@ -4,11 +4,13 @@
   let initCalled;
   const callbackPromise = new Promise((r) => window.__initGoodMap = r);
 
-  function loadGoogleMaps(apiKey) {
+  function loadGoogleMaps(apiKey, language, region) {
     if (!initCalled) {
       const script = document.createElement('script');
       script.src = 'https://maps.googleapis.com/maps/api/js?' +
         (apiKey ? `key=${apiKey}&` : '') +
+        (language ? `language=${language}&` : '') +
+        (region ? `region=${region}&` : '') +
         'callback=__initGoodMap';
       document.head.appendChild(script);
       initCalled = true;
@@ -16,23 +18,30 @@
     return callbackPromise;
   }
 
+  function dashToCamelCase(dash) {
+    return dash.indexOf('-') < 0 ? dash : dash.replace(/-[a-z]/g, (m) => m[1].toUpperCase());
+  }
+
   customElements.define('good-map', class extends HTMLElement {
     static get observedAttributes() {
-      return ['api-key', 'zoom', 'latitude', 'longitude', 'map-options'];
+      return ['api-key', 'language', 'region', 'zoom', 'latitude', 'longitude', 'map-options'];
     }
 
     attributeChangedCallback(name, oldVal, val) {
+      name = dashToCamelCase(name);
       switch (name) {
-        case 'api-key':
-          this.apiKey = val;
+        case 'apiKey':
+        case 'language':
+        case 'region':
+          this[name] = val;
           break;
         case 'zoom':
         case 'latitude':
         case 'longitude':
           this[name] = parseFloat(val);
           break;
-        case 'map-options':
-          this.mapOptions = JSON.parse(val);
+        case 'mapOptions':
+          this[name] = JSON.parse(val);
           break
       }
     }
@@ -42,6 +51,8 @@
 
       this.map = null;
       this.apiKey = null;
+      this.language = null;
+      this.region = null;
       this.zoom = null;
       this.latitude = null;
       this.longitude = null;
@@ -49,7 +60,7 @@
     }
 
     connectedCallback() {
-      loadGoogleMaps(this.apiKey).then(() => {
+      loadGoogleMaps(this.apiKey, this.language, this.region).then(() => {
         if (!this.mapOptions.zoom) {
           this.mapOptions.zoom = this.zoom || 0;
         }
